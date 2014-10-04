@@ -64,7 +64,7 @@ function getChannelindex(chan) {
 
 function sendMail(e) {
     try {
-        window.location.href = 'mailto:info@mobilelagos.com?subject=Contact Mobile Lagos&body=Contact Mobile Lagos...';
+        window.location.href = 'mailto:info@mobilenigeria.ng?subject=Contact Mobile Lagos&body=Contact Mobile Lagos...';
     }
     catch (ee) { }
 }
