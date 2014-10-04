@@ -1,0 +1,143 @@
+<div id="event" data-role="view" data-title="Trending Event" data-layout="main-layout" data-init="fillEvent" data-show="pageShow">
+
+    <script id="eventtemplate" type="text/x-kendo-template">
+         <a>
+              <div class="tweet">
+                  <img class="pullImage" src="img/ticketicon.png" />#= title #
+                <div class="metadata">
+                    <i class="sublink" >#= pubDate #</i>
+                    <input  value="#= sn #" type="hidden" />
+                      <b style='display:none'>#=link#</b>
+                </div>
+            </div>
+        </a>
+    </script>
+
+    <ul id="eventlist"></ul>
+    <script>
+
+
+
+        function eventlastID() {
+            try {
+                return $('#eventlist li').last().find('input').val();
+            }
+            catch (u) {
+                return 0;
+            }
+        }
+
+        function eventfirstID() {
+            try {
+                return $('#eventlist li').first().find('input').val();
+            }
+            catch (u) {
+                return 0;
+            }
+        }
+
+        function fillEvent() {
+
+
+            app.showLoading();
+
+            $("#eventlist").kendoMobileListView({
+                dataSource: eventdataSource,
+                pullToRefresh: true,
+                appendOnRefresh: true,
+                template: $("#eventtemplate").text(),
+                pullParameters: function (item) {
+                    //item is the first data item in the ListView
+                    return {
+                        id: eventfirstID(),
+                        page: 0
+                    };
+                },
+                //endlessScroll: true,
+                //endlessScrollParameters: function (firstItem, lastItem) {
+                //    if (firstItem) {
+                //        return {
+                //            id: eventlastID()
+                //        };
+                //    }
+                //    if (lastItem) {
+                //        return {
+                //            id: eventlastID()
+                //        };
+                //    }
+
+                //},
+                dataBound: function (e) {
+
+                    $("#eventlist li").each(function (index) {
+
+                        try {
+
+                            var indx = getChannelindex(chan);
+
+                            var href = $(this).find('b').text();
+                            $(this).click(function () {
+                                app.showLoading();
+                                window.open(href, '_blank', 'location=no');
+                                app.hideLoading();
+                            });
+
+                            app.hideLoading();
+                        }
+                        catch (e) {
+                            app.hideLoading();
+                        }
+                    });
+
+                }
+
+            });
+        }
+        var eventdataSource = new kendo.data.DataSource({
+            serverPaging: true,
+            pageSize: 5,
+            transport: {
+                read: {
+                    url: latest_url, // the remote service url
+                    dataType: "xml"
+                },
+                parameterMap: function (options) {
+                    return {
+                        Channels: 'ADS',
+                        page: options.page,
+                        rpp: options.pageSize,
+                        id: options.id ? options.id : 1 //available when the ListView is pulled.
+                        // topid: options.topid ? options.topid : 1 //avaliable when the ListView scrolled down.
+                    };
+                }
+            },
+            error: function (e) {
+                alertmsg(e.errors);
+                app.hideLoading();
+            },
+            schema: { // describe the result format
+                // data: "results" // the data which the DataSource will be bound to is in the "results" field
+                // specify the the schema is XML
+                type: "xml",
+                // the XML element which represents a single data record
+                data: "/ArrayOfArticle/Article",
+                // define the model - the object which will represent a single data record
+                model: {
+                    // configure the fields of the object
+                    fields: {
+                        title: "Title/text()",
+                        link: "DetailLink/text()",
+                        sourceid: "SourceID/text()",
+                        pubDate: "pubDate/text()",
+                        imageurl: "ImageUrl/text()",
+                        islastitem: "IsLastItem/text()",
+                        sn: "SN/text()"
+                    }
+                },
+
+                total: function () { return 50 }
+            }
+        });
+    </script>
+
+</div>
